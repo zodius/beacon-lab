@@ -1,0 +1,42 @@
+.news_title {
+	font-weight: bold;
+}
+
+.preview_article {
+	/* Text truncation only support in Chrome
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	*/
+	overflow: hidden;
+	word-break: break-all;
+	line-height: 1.7;
+	/*
+	 * calc(x * y * n)
+	 *	x -> font-size
+	 *	y -> line-height
+	 *	n -> number of lines to truncate
+	 */
+	height: calc(0.9375rem * 1.7 * 2);
+	position: relative;
+}
+
+.bigger {
+	transform: scale(1.5);
+}
+
+/* º¥¼h­I´ºÂÐ»\
+.idx_news > ul > li > .news_article > .preview_article > div {
+	position: absolute;
+	width: 100%;
+	bottom: 0;
+	left: 0;
+	text-align: right;
+	padding-top: calc(0.9375rem * 1.7 * 1);
+	background: linear-gradient(to bottom, rgba(255,255,255,0) 30%, rgba(255,255,255,1) 70%);
+}
+
+.idx_news > ul > li > .news_article > .preview_article > div > a {
+	display: block;
+}
+*/

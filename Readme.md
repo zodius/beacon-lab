@@ -10,11 +10,11 @@ user透過各種channel取得shellcode, 執行後想辦法將result回傳給serv
 > <length><b byte id><action(\x02)><result>\x00
 
 ### HTTP Image Channel
-> GET /favicon.ico HTTP/1.1
-UA: <url encoded id>
+> GET / HTTP/1.1
+UA: <id>
 < HTTP/1.1 200 OK <img with shellcode in first channel>
 > GET /flag.php?result=<result>
-UA: <url encoded id>
+UA: <id>
 
 ### DNS
 > dig <id>.shellcode.lab.example.com TXT

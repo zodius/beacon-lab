@@ -90,7 +90,7 @@ def create_app():
         if len(userid) < 16:
             userid = pkcs_pad(userid, 16)
 
-        answer = calc_xor(userid, key).hex()
+        answer = calc_xor(uid, key).hex()
 
         save_to_redis(challenge, userid, answer)
 
