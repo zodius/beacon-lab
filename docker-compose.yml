@@ -1,0 +1,20 @@
+services:
+
+  redis:
+    image: redis:7.0-alpine
+    expose:
+      - "6379"
+
+  scoreboard:
+    image: php:8.4-apache
+    ports:
+      - "8080:80"
+    volumes:
+      - ./scoreboard:/var/www/html
+  
+  shellcode:
+    build: ./challenges/shellcode-generator
+    volumes:
+      - ./challenges/shellcode-generator:/app
+    expose:
+      - "5000"
