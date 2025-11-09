@@ -3,19 +3,19 @@ session_start();
 require_once 'db.php';
 
 // 檢查是否登入
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user_uid'])) {
     header('Location: login.php');
     exit;
 }
 
 $current_username = $_SESSION['username'] ?? '訪客';
-$user_id = $_SESSION['user_id'];
+$user_uid = $_SESSION['user_uid'];
 
 // 取得資料庫實例
 $db = Database::getInstance();
 
 // 取得使用者已獲得的徽章
-$user_badges = $db->getUserBadges($user_id);
+$user_badges = $db->getUserBadges($user_uid);
 
 // 定義題目資料
 $challenges = [
@@ -109,19 +109,52 @@ foreach ($challenges as $challenge) {
             top: 20px;
             left: 20px;
             background: var(--card-bg);
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            padding: 10px 20px;
+            border: 2px solid var(--primary-color);
+            border-radius: 12px;
+            padding: 15px 25px;
             color: var(--text-primary);
             font-weight: 600;
             z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 4px 20px rgba(0, 255, 65, 0.3);
+            backdrop-filter: blur(10px);
+            max-width: 400px;
+        }
+
+        .user-info i {
+            color: var(--primary-color);
+        }
+
+        .user-info-row {
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .user-info i {
+        .user-info-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            min-width: 45px;
+        }
+
+        .user-info-value {
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .uid-display {
+            background: rgba(0, 255, 65, 0.1);
+            border: 1px solid var(--primary-color);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
             color: var(--primary-color);
+            word-break: break-all;
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
         }
 
         .nav-buttons {
@@ -437,8 +470,16 @@ foreach ($challenges as $challenge) {
 <body>
     <!-- User Info -->
     <div class="user-info">
-        <i class="fas fa-user-shield"></i>
-        <span><?php echo htmlspecialchars($current_username); ?></span>
+        <div class="user-info-row">
+            <i class="fas fa-user-shield"></i>
+            <span class="user-info-label">使用者:</span>
+            <span class="user-info-value"><?php echo htmlspecialchars($current_username); ?></span>
+        </div>
+        <div class="user-info-row">
+            <i class="fas fa-fingerprint"></i>
+            <span class="user-info-label">UID:</span>
+        </div>
+        <div class="uid-display"><?php echo htmlspecialchars($user_uid); ?></div>
     </div>
 
     <!-- Navigation Buttons -->

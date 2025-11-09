@@ -9,6 +9,26 @@
         $redis->connect('redis', 6379);
         $stored_flag = $redis->get("shellcode:http:$user_id");
         if ($stored_flag && $stored_flag === $flag) {
+            // call scoreboard API to submit flag
+            $api_key = $_ENV['API_KEY'] ?? '';
+            if (!$api_key) {
+                // missing API key
+            } else {
+                $ch = curl_init('http://scoreboard/hook.php');
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_POST, 1);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+                    'userid' => $user_id,
+                    'challenge' => 'http',
+                    'challenge' => 'HTTP Beacon'
+                ]));
+                curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                    'X-API-KEY: ' . $api_key
+                ]);
+                curl_exec($ch);
+                curl_close($ch);
+            }
+
             echo "<h1>Congratulations!</h1>";
         } else {
             echo "<h1>Incorrect flag.</h1>";

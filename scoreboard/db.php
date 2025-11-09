@@ -29,7 +29,7 @@ class Database {
         // 建立使用者資料表
         $this->db->exec("
             CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                uid TEXT PRIMARY KEY NOT NULL,
                 username TEXT UNIQUE NOT NULL,
                 password TEXT NOT NULL,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -41,17 +41,17 @@ class Database {
         $this->db->exec("
             CREATE TABLE IF NOT EXISTS badges (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
+                user_uid TEXT NOT NULL,
                 name TEXT NOT NULL,
                 icon TEXT NOT NULL,
                 earned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-                UNIQUE(user_id, name)
+                FOREIGN KEY (user_uid) REFERENCES users(uid) ON DELETE CASCADE,
+                UNIQUE(user_uid, name)
             )
         ");
         
         // 建立索引以提升查詢效能
-        $this->db->exec("CREATE INDEX IF NOT EXISTS idx_badges_user_id ON badges(user_id)");
+        $this->db->exec("CREATE INDEX IF NOT EXISTS idx_badges_user_uid ON badges(user_uid)");
         $this->db->exec("CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)");
     }
     
@@ -66,23 +66,23 @@ class Database {
         
         if ($user) {
             // 取得該使用者的徽章
-            $user['badges'] = $this->getUserBadges($user['id']);
+            $user['badges'] = $this->getUserBadges($user['uid']);
         }
         
         return $user;
     }
     
     /**
-     * 取得使用者資料（依 ID）
+     * 取得使用者資料（依 UID）
      */
-    public function getUserById($user_id) {
-        $stmt = $this->db->prepare("SELECT * FROM users WHERE id = ?");
-        $stmt->bindValue(1, $user_id, SQLITE3_INTEGER);
+    public function getUserByUid($uid) {
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE uid = ?");
+        $stmt->bindValue(1, $uid, SQLITE3_TEXT);
         $result = $stmt->execute();
         $user = $result->fetchArray(SQLITE3_ASSOC);
         
         if ($user) {
-            $user['badges'] = $this->getUserBadges($user['id']);
+            $user['badges'] = $this->getUserBadges($user['uid']);
         }
         
         return $user;
@@ -91,14 +91,14 @@ class Database {
     /**
      * 取得使用者的徽章
      */
-    public function getUserBadges($user_id) {
+    public function getUserBadges($uid) {
         $stmt = $this->db->prepare("
             SELECT name, icon, earned_at 
             FROM badges 
-            WHERE user_id = ? 
+            WHERE user_uid = ? 
             ORDER BY earned_at ASC
         ");
-        $stmt->bindValue(1, $user_id, SQLITE3_INTEGER);
+        $stmt->bindValue(1, $uid, SQLITE3_TEXT);
         $result = $stmt->execute();
         
         $badges = [];
@@ -114,15 +114,19 @@ class Database {
      */
     public function createUser($username, $password) {
         try {
+            // 生成 16 byte (32 字元) 的 hex UID
+            $uid = bin2hex(random_bytes(16));
+            
             $stmt = $this->db->prepare("
-                INSERT INTO users (username, password, created_at, last_login) 
-                VALUES (?, ?, datetime('now'), datetime('now'))
+                INSERT INTO users (uid, username, password, created_at, last_login) 
+                VALUES (?, ?, ?, datetime('now'), datetime('now'))
             ");
-            $stmt->bindValue(1, $username, SQLITE3_TEXT);
-            $stmt->bindValue(2, $password, SQLITE3_TEXT);
+            $stmt->bindValue(1, $uid, SQLITE3_TEXT);
+            $stmt->bindValue(2, $username, SQLITE3_TEXT);
+            $stmt->bindValue(3, $password, SQLITE3_TEXT);
             
             if ($stmt->execute()) {
-                return $this->db->lastInsertRowID();
+                return $uid;
             }
             return false;
         } catch (Exception $e) {
@@ -133,22 +137,22 @@ class Database {
     /**
      * 更新最後登入時間
      */
-    public function updateLastLogin($user_id) {
-        $stmt = $this->db->prepare("UPDATE users SET last_login = datetime('now') WHERE id = ?");
-        $stmt->bindValue(1, $user_id, SQLITE3_INTEGER);
+    public function updateLastLogin($uid) {
+        $stmt = $this->db->prepare("UPDATE users SET last_login = datetime('now') WHERE uid = ?");
+        $stmt->bindValue(1, $uid, SQLITE3_TEXT);
         return $stmt->execute();
     }
     
     /**
      * 新增徽章給使用者（避免重複）
      */
-    public function addBadge($user_id, $badge_name, $badge_icon) {
+    public function addBadge($uid, $badge_name, $badge_icon) {
         try {
             $stmt = $this->db->prepare("
-                INSERT INTO badges (user_id, name, icon) 
+                INSERT INTO badges (user_uid, name, icon) 
                 VALUES (?, ?, ?)
             ");
-            $stmt->bindValue(1, $user_id, SQLITE3_INTEGER);
+            $stmt->bindValue(1, $uid, SQLITE3_TEXT);
             $stmt->bindValue(2, $badge_name, SQLITE3_TEXT);
             $stmt->bindValue(3, $badge_icon, SQLITE3_TEXT);
             
@@ -161,12 +165,12 @@ class Database {
     /**
      * 檢查使用者是否已有此徽章
      */
-    public function hasBadge($user_id, $badge_name) {
+    public function hasBadge($uid, $badge_name) {
         $stmt = $this->db->prepare("
             SELECT COUNT(*) as count FROM badges 
-            WHERE user_id = ? AND name = ?
+            WHERE user_uid = ? AND name = ?
         ");
-        $stmt->bindValue(1, $user_id, SQLITE3_INTEGER);
+        $stmt->bindValue(1, $uid, SQLITE3_TEXT);
         $stmt->bindValue(2, $badge_name, SQLITE3_TEXT);
         $result = $stmt->execute();
         $row = $result->fetchArray(SQLITE3_ASSOC);
@@ -179,20 +183,20 @@ class Database {
     public function getScoreboard() {
         $result = $this->db->query("
             SELECT 
-                u.id,
+                u.uid,
                 u.username,
                 u.created_at,
                 u.last_login,
                 COUNT(b.id) as badge_count
             FROM users u
-            LEFT JOIN badges b ON u.id = b.user_id
-            GROUP BY u.id
+            LEFT JOIN badges b ON u.uid = b.user_uid
+            GROUP BY u.uid
             ORDER BY badge_count DESC, u.username ASC
         ");
         
         $users = [];
         while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
-            $row['badges'] = $this->getUserBadges($row['id']);
+            $row['badges'] = $this->getUserBadges($row['uid']);
             $users[] = $row;
         }
         

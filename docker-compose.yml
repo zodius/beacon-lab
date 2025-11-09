@@ -9,8 +9,12 @@ services:
     image: php:8.4-apache
     ports:
       - "8080:80"
+    expose:
+      - "80"
     volumes:
       - ./scoreboard:/var/www/html
+    environment:
+      - API_KEY=${API_KEY:-default_key}
   
   shellcode:
     build: ./challenges/shellcode-generator
@@ -25,3 +29,5 @@ services:
       - "8081:80"
     volumes:
       - ./challenges/http:/var/www/html
+    environment:
+      - API_KEY=${API_KEY:-default_key}

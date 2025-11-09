@@ -46,12 +46,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // 使用者存在 - 驗證密碼（明文比對）
         if ($password === $user['password']) {
             // 登入成功
-            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['user_uid'] = $user['uid'];
             $_SESSION['username'] = $username;
             $_SESSION['login_time'] = time();
             
             // 更新最後登入時間
-            $db->updateLastLogin($user['id']);
+            $db->updateLastLogin($user['uid']);
             
             echo json_encode([
                 'success' => true,
@@ -67,11 +67,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } else {
         // 使用者不存在 - 自動註冊
-        $user_id = $db->createUser($username, $password);
+        $uid = $db->createUser($username, $password);
         
-        if ($user_id) {
+        if ($uid) {
             // 設定 session
-            $_SESSION['user_id'] = $user_id;
+            $_SESSION['user_uid'] = $uid;
             $_SESSION['username'] = $username;
             $_SESSION['login_time'] = time();
             
@@ -91,8 +91,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// 如果已登入，直接跳轉
-if (isset($_SESSION['user_id'])) {
+// 如果已登入,直接跳轉
+if (isset($_SESSION['user_uid'])) {
     header('Location: index.php');
     exit;
 }

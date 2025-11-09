@@ -3,7 +3,7 @@ session_start();
 require_once 'db.php';
 
 // 檢查是否登入
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user_uid'])) {
     header('Location: login.php');
     exit;
 }
