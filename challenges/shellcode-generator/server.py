@@ -1,6 +1,5 @@
 import base64
 import secrets
-import sys
 
 import pwnlib.shellcraft as sc
 import redis
@@ -76,6 +75,8 @@ def save_to_redis(game: str, userid: str, answer: str):
 
 def create_app():
     app = Flask(__name__)
+    app.logger.setLevel("INFO")
+    app.logger.info("Shellcode generator server starting...")
 
     @app.route("/generate", methods=["POST"])
     def generate():
@@ -93,6 +94,9 @@ def create_app():
         answer = calc_xor(uid, key).hex()
 
         save_to_redis(challenge, userid, answer)
+        app.logger.info(
+            f"user {userid} for challenge {challenge} saved answer {answer}"
+        )
 
         shellcode = generate_shellcode(uid, key)
         return base64.b64encode(shellcode)

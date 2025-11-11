@@ -5,9 +5,9 @@ user透過各種channel取得shellcode, 執行後想辦法將result回傳給serv
 
 ## Channels
 ### TCP
-> <length><8 byte id><action(\x01)>\x00
-< <length><8 byte key><shellcode>\x00
-> <length><b byte id><action(\x02)><result>\x00
+> <length><16 byte id><action(\x01)>\x00
+< <length><16 byte id><shellcode>\x00
+> <length><16 byte id><action(\x02)><result>\x00
 
 ### HTTP Image Channel
 > GET / HTTP/1.1
