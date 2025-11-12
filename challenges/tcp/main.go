@@ -64,10 +64,10 @@ func handleConnection(conn net.Conn, shellcodeRepo *ShellcodeRepo, redisRepo *Re
 		resPacket.Payload = shellcode
 	case ActionResult:
 		log.Default().Println("Received ActionResult")
-		userid := packet.Key
+		userid := packet.KeyString()
 		submitedAnswer := packet.Payload
 
-		answer, err := redisRepo.GetAnswer(packet.KeyString())
+		answer, err := redisRepo.GetAnswer(userid)
 		if err != nil {
 			log.Default().Println("Error getting answer from Redis:", err)
 			return
