@@ -5,6 +5,38 @@ user透過各種channel取得shellcode, 執行後想辦法將result回傳給serv
 
 ## Channels
 ### TCP
+
+#### 封包格式 (Packet Format)
+```
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        Length (4 bytes)                       |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                       Key (16 bytes)                          |
+|                         User ID                               |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|    Action     |                                               |
++-+-+-+-+-+-+-+-+                                               +
+|                                                               |
+|                    Payload (variable)                         |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+```
+
+**欄位說明：**
+- **Length** (4 bytes, Big Endian): 整個封包的總長度（包含 Length、Key、Action、Payload）
+- **Key** (16 bytes): 使用者 ID（固定 16 bytes）
+- **Action** (1 byte): 動作類型
+  - `0x01` - ActionCall: 請求 shellcode
+  - `0x02` - ActionCallAck: 回傳 shellcode
+  - `0x03` - ActionResult: 提交執行結果
+  - `0x04` - ActionResultAck: 確認結果
+- **Payload** (variable): 資料內容（shellcode 或 result）
+
+#### 通訊流程
 > <length><16 byte id><action(\x01)>\x00
 < <length><16 byte id><shellcode>\x00
 > <length><16 byte id><action(\x02)><result>\x00
