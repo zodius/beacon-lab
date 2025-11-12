@@ -55,7 +55,7 @@ func handleConnection(conn net.Conn, shellcodeRepo *ShellcodeRepo, redisRepo *Re
 	switch packet.Action {
 	case ActionCall:
 		log.Default().Println("Received ActionCall")
-		shellcode := shellcodeRepo.GenerateShellcode(packet.Key)
+		shellcode := shellcodeRepo.GenerateShellcode(packet.KeyString())
 		if shellcode == nil {
 			return
 		}
@@ -67,7 +67,7 @@ func handleConnection(conn net.Conn, shellcodeRepo *ShellcodeRepo, redisRepo *Re
 		userid := packet.Key
 		submitedAnswer := packet.Payload
 
-		answer, err := redisRepo.GetAnswer(userid)
+		answer, err := redisRepo.GetAnswer(packet.KeyString())
 		if err != nil {
 			log.Default().Println("Error getting answer from Redis:", err)
 			return

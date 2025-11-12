@@ -23,6 +23,11 @@ type CommandPacket struct {
 	Payload []byte
 }
 
+func (c *CommandPacket) KeyString() string {
+	// convert byte to hex string
+	return fmt.Sprintf("%x", c.Key)
+}
+
 // ParsePacket 從 reader 解析一個封包
 func ParsePacket(r io.Reader) (*CommandPacket, error) {
 	var p CommandPacket

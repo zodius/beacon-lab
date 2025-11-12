@@ -11,11 +11,11 @@ type ShellcodeRepo struct {
 	Url string
 }
 
-func (s *ShellcodeRepo) GenerateShellcode(userid [16]byte) []byte {
+func (s *ShellcodeRepo) GenerateShellcode(userid string) []byte {
 	challenge := "tcp"
 
 	req, err := http.PostForm(s.Url+"/generate", url.Values{
-		"userid":    {string(userid[:])},
+		"userid":    {userid},
 		"challenge": {challenge},
 	})
 	if err != nil {

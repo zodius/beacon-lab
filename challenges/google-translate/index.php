@@ -58,7 +58,7 @@
     }
 ?>
 
-<?php if ($is_submit): ?>
+<?php if ($is_agent && $is_submit): ?>
     <?php if ($stored_flag && $stored_flag === $flag): ?>
         <h1>Congratulations!</h1>
     <?php else: ?>

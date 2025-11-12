@@ -20,8 +20,8 @@ func (r *RedisRepo) Connect(addr string) error {
 	return err
 }
 
-func (r *RedisRepo) GetAnswer(userid [16]byte) ([]byte, error) {
-	key := "shellcode:tcp:" + string(userid[:])
+func (r *RedisRepo) GetAnswer(userid string) ([]byte, error) {
+	key := "shellcode:tcp:" + userid
 	val, err := r.RDB.Get(context.Background(), key).Bytes()
 	return val, err
 }
