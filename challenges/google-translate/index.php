@@ -38,7 +38,7 @@
                 curl_setopt($ch, CURLOPT_POST, 1);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
                     'userid' => $agent_id,
-                    'challenge' => 'Translator Beacon',
+                    'challenge' => 'Translate Beacon',
                 ]));
                 curl_setopt($ch, CURLOPT_HTTPHEADER, [
                     'X-API-KEY: ' . $api_key
