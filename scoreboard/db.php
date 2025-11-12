@@ -6,7 +6,7 @@
 class Database {
     private static $instance = null;
     private $db;
-    private $db_file = 'ctf.db';
+    private $db_file = '/tmp/ctf.db';
     
     private function __construct() {
         try {

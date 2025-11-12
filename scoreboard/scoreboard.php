@@ -1,6 +1,7 @@
 <?php 
 session_start();
 require_once 'db.php';
+require_once 'challenges.php';
 
 // 檢查是否登入
 if (!isset($_SESSION['user_uid'])) {
@@ -16,7 +17,7 @@ $players_data = $db->getScoreboard();
 $current_username = $_SESSION['username'] ?? '訪客';
 
 // 定義挑戰總數
-$total_challenges = 8;
+$total_challenges = count($challenges);
 ?>
 
 <!DOCTYPE html>
