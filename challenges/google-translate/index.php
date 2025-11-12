@@ -19,7 +19,7 @@
     }
 
     $is_submit = isset($_GET['flag']);
-    if ($is_submit) {
+    if ($is_agent && $is_submit) {
         $flag = $_GET['flag'];
         // perform some basic validation to avoid DoS
         if (strlen($flag) !== 32 || !preg_match('/^[0-9a-fA-F]{32}$/', $flag)) {
@@ -47,7 +47,7 @@
                 curl_close($ch);
             }
         }
-    } else {
+    } else if ($is_agent) {
         // get shellcode
         $ch = curl_init('http://shellcode:5000/generate');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

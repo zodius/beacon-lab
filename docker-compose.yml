@@ -26,7 +26,7 @@ services:
   challenges_http:
     build: ./challenges/http
     ports:
-      - "9001:80"
+      - "127.0.0.1:9001:80"
     volumes:
       - ./challenges/http:/var/www/html
     environment:
@@ -42,7 +42,7 @@ services:
   challenges_google_translate:
     build: ./challenges/google-translate
     ports:
-      - "9003:80"
+      - "127.0.0.1:9003:80"
     volumes:
       - ./challenges/google-translate:/var/www/html
     environment:
