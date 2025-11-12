@@ -8,7 +8,7 @@ services:
   scoreboard:
     image: php:8.4-apache
     ports:
-      - "8080:80"
+      - "9000:80"
     expose:
       - "80"
     volumes:
@@ -26,7 +26,7 @@ services:
   challenges_http:
     build: ./challenges/http
     ports:
-      - "8081:80"
+      - "9001:80"
     volumes:
       - ./challenges/http:/var/www/html
     environment:
@@ -35,7 +35,17 @@ services:
   challenges_tcp:
     build: ./challenges/tcp
     ports:
-      - "8082:8082"
+      - "9002:8082"
     environment:
       - API_KEY=${API_KEY:-default_key}
+  
+  challenges_google_translate:
+    build: ./challenges/google-translate
+    ports:
+      - "9003:80"
+    volumes:
+      - ./challenges/google-translate:/var/www/html
+    environment:
+      - API_KEY=${API_KEY:-default_key}
+      - VALID_HOST=${VALID_HOST:-example.com}
 
